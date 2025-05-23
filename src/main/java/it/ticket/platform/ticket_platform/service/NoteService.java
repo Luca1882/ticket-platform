@@ -66,12 +66,17 @@ public class NoteService {
         return noteRepository.save(noteToUpdate);
     }
 
+    // Elimina tutte le note associate a un ticket
+    public void deleteByTicket(Ticket ticket) {
+        noteRepository.deleteAllByTicket(ticket);
+    }
+
     // Elimina la nota
-    public void deleteNote(Long id){
+    public void deleteNote(Long id) {
         // COntrollo se la nota esiste
         Note noteToDelete = noteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("La nota con ID " + id + " non esiste"));
-                // Eliminazione
-                noteRepository.delete(noteToDelete);
+        // Eliminazione
+        noteRepository.delete(noteToDelete);
     }
 }

@@ -7,4 +7,6 @@ import it.ticket.platform.ticket_platform.model.Categoria;
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
         
     //Creata per la lettura di Categoria
+    //Ricerca la categoria per Id
+    
 }

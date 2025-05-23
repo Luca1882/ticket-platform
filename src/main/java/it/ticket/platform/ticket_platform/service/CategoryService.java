@@ -25,4 +25,6 @@ public class CategoryService {
         return categoriaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Categoria con ID " + id + " non trovata."));
     }
+
+    //Ricerca la categoria 
 }

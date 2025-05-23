@@ -2,13 +2,16 @@ package it.ticket.platform.ticket_platform.model;
 
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users")
@@ -18,9 +21,11 @@ public class User {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     @NotBlank(message = "Il campo username è obbligatorio")
     private String username;
 
+    @Column(unique = true)
     @NotBlank(message = "Il campo e-mail è obbligatorio")
     private String email;
 
@@ -32,8 +37,9 @@ public class User {
     @OneToMany(mappedBy= "user")
     private List<Ticket> tickets;
 
-    @OneToMany(mappedBy= "user")
-    private List<Note> notes;
+    @ManyToOne(optional = false)
+    @NotNull(message = "Il campo ruolo è obbligatorio")
+    private Role role;
 
     public Long getId() {
         return id;
@@ -83,13 +89,12 @@ public class User {
         this.tickets = tickets;
     }
 
-    public List<Note> getNotes() {
-        return notes;
+    public Role getRole() {
+        return role;
     }
 
-    public void setNotes(List<Note> notes) {
-        this.notes = notes;
+    public void setRole(Role role) {
+        this.role = role;
     }
-
     
 }

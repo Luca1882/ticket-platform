@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.ticket.platform.ticket_platform.enumeration.Status;
+import it.ticket.platform.ticket_platform.model.Categoria;
 import it.ticket.platform.ticket_platform.model.Ticket;
 import it.ticket.platform.ticket_platform.model.User;
 import it.ticket.platform.ticket_platform.repository.TicketRepository;
@@ -37,6 +39,16 @@ public class TicketService {
         }
     }
 
+    //Filtro per staturs
+    public List<Ticket> getTicketsByStatus(Status status) {
+    return ticketRepository.findByStatus(status);
+}
+
+    // Ricerca del ticket per categoria
+    public List<Ticket> getTicketsByCategoria(Categoria categoria) {
+        return ticketRepository.findByCategoria(categoria);
+    }
+
     // Ricerca dele ticket per titolo
     public List<Ticket> findTicketByTitle(String title) {
         return ticketRepository.findByTitleContains(title);
@@ -62,6 +74,12 @@ public class TicketService {
         addTicket.setDataCreazione(LocalDateTime.now()); // Imposto la data di creazione
         return ticketRepository.save(addTicket);
     }
+    
+    // Salvo il ticket
+    public Ticket saveTicket(Ticket ticket) {
+        return ticketRepository.save(ticket);
+    }
+
     // Modifica del ticket
     public Ticket aggiornaTicket(Long id, Ticket showTicket){
         Ticket ticket = ticketRepository.findById(id)
@@ -75,7 +93,7 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
     //Elimino il ticket
-    public void eliminaTicket(Long id){
+    public void deleteTicket(Long id){
         Ticket ticket = ticketRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Il ticket con ID " + id + " non esiste."));
         ticketRepository.delete(ticket);

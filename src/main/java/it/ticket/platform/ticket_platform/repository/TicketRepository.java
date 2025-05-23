@@ -1,5 +1,6 @@
 package it.ticket.platform.ticket_platform.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     //Filtra i ticket per categoria
     List<Ticket> findByCategoria(Categoria categoria);
 
-    //Filtra i ticket per titolo(da completare dopo modifica)
+    //Filtra per titolo
+    List<Ticket> findByTitleContains(String title);
+
+    //Filtra i ticket per data creazione
+    List<Ticket> findByDataCreazione(LocalDateTime dataCreazione);
 }

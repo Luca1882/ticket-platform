@@ -11,8 +11,9 @@ import it.ticket.platform.ticket_platform.model.Ticket;
 public interface NoteRepository extends JpaRepository<Note, Long> {
     
         //Filtra tutte le note di associate al ticket in ordine di data di arrivo
-        List<Ticket> findByTicketOrderCreationDesc(Ticket ticket);
+        List<Note> findByTicketOrderByDataCreazioneDesc(Ticket ticket);
 
-        //Filtra tutte le note scritte da un operatore
-        //List<Note> findByUser (User user);
+        //Cancella la nota associata al ticket
+        void deleteAllByTicket(Ticket ticket);
+
 }   

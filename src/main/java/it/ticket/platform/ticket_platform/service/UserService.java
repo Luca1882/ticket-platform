@@ -15,23 +15,43 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    //Ottengo tutti gli utenti
-    public List<User> getAllUser(){
+    // Ottengo tutti gli utenti
+    public List<User> getAllUser() {
         return userRepository.findAll();
     }
 
-    //Trovo l'user per mail
-    public Optional<User> getUserByEmail(String email){
+    // Trovo l'user per mail
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    //Trova l'user per disponibilità ed ID
-    public boolean isUserDisponibile(Long id){
+    //Trova l'user per ID
+    public User getUserById(Long id){
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("L'utente con ID " + id + " non esiste"));
+    }
+
+    // Trova l'user per disponibilità ed ID
+    public boolean isUserDisponibile(Long id) {
         Optional<User> user = userRepository.findById(id);
-        if(user.isPresent()){
+        if (user.isPresent()) {
             return user.get().isDisponibile();
-        } else{
-            return false; //Se l'utente non esiste non è disponibile
+        } else {
+            return false; // Se l'utente non esiste non è disponibile
         }
+    }
+
+    // Trova l'user disponibile
+    public User findOperatoreDisponibile() {
+        List<User> utenti = userRepository.findAll();
+        return utenti.stream()
+                .filter(u -> u.getRole().getName().equalsIgnoreCase("OPERATORE") && u.isDisponibile())
+                .findFirst()
+                .orElse(null);
+    }
+
+    // Salva l'utente
+    public User saveUser(User user){
+        return userRepository.save(user);
     }
 }

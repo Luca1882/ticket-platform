@@ -9,6 +9,8 @@ import it.ticket.platform.ticket_platform.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+
+
     // Filtra l'utente per email
     Optional<User> findByEmail(String email);
 
