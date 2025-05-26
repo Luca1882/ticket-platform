@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -21,6 +22,7 @@
     <div class="container mt-5">
         <h1 class="mb-4">Benvenuto nella Dashboard Admin</h1>
 
+        <!-- Messaggi di feedback -->
         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
             <span th:text="${errorMessage}"></span>
         </div>
@@ -29,7 +31,13 @@
             <span th:text="${successMessage}"></span>
         </div>
 
-        <a href="/ticket/create" class="btn btn-success mb-3">Crea Nuovo Ticket</a>
+        <!-- Bottoni visibili solo all'ADMIN -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <a href="/ticket/create" class="btn btn-success mb-3">Crea Nuovo Ticket</a>
+            <a href="/user/create" class="btn btn-primary mb-3">Crea Operatore</a>
+        </div>
+
+        <!-- Tabella dei ticket -->
         <div>
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
@@ -42,10 +50,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!--Messaggio se non ci sono ticket-->
+                    <!-- Messaggio se non ci sono ticket -->
                     <tr th:if="${#lists.isEmpty(tickets)}">
                         <td colspan="5" class="text-center">Nessun ticket presente al momento.</td>
                     </tr>
+                    <!-- Iterazione sui ticket -->
                     <tr th:each="ticket : ${tickets}">
                         <td th:text="${ticket.id}"></td>
                         <td>
@@ -53,27 +62,31 @@
                         </td>
                         <td th:text="${ticket.status}"></td>
                         <td th:text="${ticket.testo}"></td>
-                        <td sec:authorize="hasRole('ADMIN')">
+                        <td>
+                            <!-- Pulsante Aggiungi Nota (visibile a tutti) -->
+                            <a th:href="@{/note/create/{id}(id=${ticket.id})}" class="btn btn-primary btn-sm">
+                                + Nota
+                            </a>
 
-                            <!-- Pulsante Aggiungi Nota -->
-                            <a th:href="@{/tickets/{id}/note/nuova(id=${ticket.id})}" class="btn btn-primary btn-sm">+
-                                Note</a>
+                            <!-- Pulsanti Edit e Delete solo per ADMIN -->
+                            <span sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{'/ticket/edit/' + ${ticket.id}}" class="btn btn-warning btn-sm">Edit</a>
 
-                            <!-- Pulsante Modifica Ticket -->
-                            <a th:href="@{'/ticket/edit/' + ${ticket.id}}" class="btn btn-warning btn-sm">Edit</a>
-
-                            <!-- Pulsante cancellazione ticket-->
-                            <form th:action="@{'/ticket/delete/' + ${ticket.id}}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Sei sicuro di voler eliminare questo ticket definitivamente?')">Delete</button>
-                            </form>
+                                <form th:action="@{'/ticket/delete/' + ${ticket.id}}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Sei sicuro di voler eliminare questo ticket definitivamente?')">
+                                        Delete
+                                    </button>
+                                </form>
+                            </span>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-
     </div>
+
+    <!-- Script per nascondere il messaggio di successo -->
     <script>
         setTimeout(function () {
             var alert = document.querySelector(".fade-out");

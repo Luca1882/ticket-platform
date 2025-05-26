@@ -21,6 +21,11 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    // Trovo l'user per username
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     // Trovo l'user per mail
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);

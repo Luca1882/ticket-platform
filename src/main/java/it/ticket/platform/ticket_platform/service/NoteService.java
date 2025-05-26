@@ -52,18 +52,15 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
-    // Modificare la nota
-    public Note updateNote(Long id, Note note) {
-        // Controllo se la nota esiste
-        Note noteToUpdate = noteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("La nota con ID " + id + " non esiste"));
+    // Salva una nota
+    public Note saveNote(Note note) {
+        return noteRepository.save(note);
+    }
 
-        // Aggiorna i campi desiderati
-        noteToUpdate.setDescrizione(note.getDescrizione());
-        noteToUpdate.setDataCreazione(note.getDataCreazione());
-        // aggiungi altri campi da aggiornare se necessario
 
-        return noteRepository.save(noteToUpdate);
+    // Trovo le note associate a un ticket
+    public List<Note> getNotesByTicket(Ticket ticket){
+        return noteRepository.findByTicket(ticket);
     }
 
     // Elimina tutte le note associate a un ticket

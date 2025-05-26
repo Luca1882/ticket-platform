@@ -49,6 +49,11 @@ public class TicketService {
         return ticketRepository.findByCategoria(categoria);
     }
 
+    // Trovo i ticket assegnati ad un operatore
+    public List<Ticket> getTicketsByUser(User user) {
+        return ticketRepository.findByUser(user);
+    }
+    
     // Ricerca dele ticket per titolo
     public List<Ticket> findTicketByTitle(String title) {
         return ticketRepository.findByTitleContains(title);

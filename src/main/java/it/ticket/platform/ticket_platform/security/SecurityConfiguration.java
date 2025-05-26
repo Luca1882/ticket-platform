@@ -19,10 +19,12 @@ public class SecurityConfiguration {
     SecurityFilterChain filterChain(HttpSecurity http)
             throws Exception {
         http.authorizeHttpRequests()
-                .requestMatchers("/ticket/create", "/ticket/edit", "/ticket/delete")
+                .requestMatchers("/ticket/create", "/ticket/edit/**", "/ticket/delete/**")
                 .hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/admin/dashboard")
-                .hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/user/create").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/admin/dashboard").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                .requestMatchers("/ticket/show/**", "/note/create/**")
+                .hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
                 .requestMatchers("/admin/**")
                 .hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/ticket/**")
@@ -31,11 +33,7 @@ public class SecurityConfiguration {
                 .and().formLogin()
                 .successHandler((request, response, authentication) -> {
                     String role = authentication.getAuthorities().iterator().next().getAuthority();
-                    if (role.equals("ROLE_ADMIN")) {
-                        response.sendRedirect("/admin/dashboard");
-                    } else {
-                        response.sendRedirect("/ticket");
-                    }
+                    response.sendRedirect("/admin/dashboard");
                     System.out.println("Login riuscito! Ruolo: " + role);
                     System.out.println("Redirect a: " + (role.equals("ROLE_ADMIN") ? "/admin/dashboard" : "/ticket"));
                 })

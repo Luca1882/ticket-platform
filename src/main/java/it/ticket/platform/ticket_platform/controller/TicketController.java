@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import it.ticket.platform.ticket_platform.enumeration.Status;
 import it.ticket.platform.ticket_platform.model.Categoria;
+import it.ticket.platform.ticket_platform.model.Note;
 import it.ticket.platform.ticket_platform.model.Ticket;
 import it.ticket.platform.ticket_platform.model.User;
 import it.ticket.platform.ticket_platform.service.CategoryService;
@@ -211,7 +212,7 @@ public class TicketController {
         return "redirect:/admin/dashboard";
     }
 
-    // Ricerca dei ticket per titolo
+    // Ricerca dei ticket per titolo - da riconfigurare
     @GetMapping("/search")
     public String search(Model model, @RequestParam(name = "keyword", required = false) String title) {
         List<Ticket> tickets = ticketService.findByTitleContainingIgnoreCase(title);
@@ -219,4 +220,19 @@ public class TicketController {
         model.addAttribute("keyword", title);
         return "admin/dashboard";
     }
+
+    // Porta alla pagina di dettaglio del ticket
+    @GetMapping("/show/{id}")
+    public String showTicket(@PathVariable("id") Long id, Model model){
+        Ticket ticket = ticketService.getTicketById(id);
+        if (ticket == null){
+            return "redirect:/admin/dashboard";
+        }
+
+        model.addAttribute("ticket", ticket);
+        model.addAttribute("newNote", new Note());
+        model.addAttribute("note", noteService.getNotesByTicket(ticket));
+
+        return "ticket/show";
+    }    
 }

@@ -10,6 +10,6 @@ public class IndexController {
 
     @GetMapping
     public String index() {
-        return "redirect:/ticket"; //Resitituisco la pagina principale dei ticket
+        return "redirect:/admin/dashboard"; //Resitituisco la pagina principale dei ticket
     }
 }
