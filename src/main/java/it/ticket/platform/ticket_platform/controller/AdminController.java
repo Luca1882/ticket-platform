@@ -21,7 +21,9 @@ public class AdminController {
 
     // Dashboard Admin
     @GetMapping("/dashboard")
-    public String showAdminDashboard(@RequestParam(name = "search", required = false) String search, Model model) {
+    public String showAdminDashboard(@RequestParam(name = "search", required = false) String search,
+                                    @RequestParam(name = "login", required = false) String login,
+                                    Model model) {
         List<Ticket> tickets;
         if (search != null && !search.isEmpty()) {
             tickets = ticketService.findTicketByTitle(search);
@@ -31,6 +33,11 @@ public class AdminController {
 
         model.addAttribute("tickets", tickets);
         model.addAttribute("search", search);
+
+        if ("true".equals(login)) {
+            model.addAttribute("successMessage", "Login effettuato con successo!");
+        }
+
         return "admin/dashboard";
     }
 }

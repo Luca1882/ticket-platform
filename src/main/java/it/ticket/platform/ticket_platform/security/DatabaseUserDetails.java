@@ -24,7 +24,9 @@ public class DatabaseUserDetails implements UserDetails {
 
         Role role = user.getRole(); // L'utente ha solo un ruolo
         if (role != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
+            authorities.add(new SimpleGrantedAuthority(role.getName().toUpperCase()));
+            //log
+            System.out.println("AUTORITÀ: " + role.getName().toUpperCase());
         }
     }
 

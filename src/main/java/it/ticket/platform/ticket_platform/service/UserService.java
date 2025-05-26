@@ -1,6 +1,7 @@
 package it.ticket.platform.ticket_platform.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    //Trova l'user per ID
-    public User getUserById(Long id){
+    // Trova l'user per ID
+    public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("L'utente con ID " + id + " non esiste"));
     }
@@ -42,16 +43,24 @@ public class UserService {
     }
 
     // Trova l'user disponibile
-    public User findOperatoreDisponibile() {
+    public List<User> findUserDisponibile() {
         List<User> utenti = userRepository.findAll();
         return utenti.stream()
-                .filter(u -> u.getRole().getName().equalsIgnoreCase("OPERATORE") && u.isDisponibile())
-                .findFirst()
-                .orElse(null);
+                .filter(u -> u.getRole().getName().equalsIgnoreCase("ROLE_USER") && u.isDisponibile())
+                .toList();
+    }
+
+    // Ritrova l'user disponibile più quello inserito
+    public List<User> findUserDisponibile(User user) {
+        List<User> utenti = userRepository.findAll();
+        return utenti.stream()
+                .filter(u -> (u.getRole().getName().equalsIgnoreCase("ROLE_USER") && u.isDisponibile()) 
+                || (Objects.equals(u.getId(), user.getId())))
+                .toList();
     }
 
     // Salva l'utente
-    public User saveUser(User user){
+    public User saveUser(User user) {
         return userRepository.save(user);
     }
 }

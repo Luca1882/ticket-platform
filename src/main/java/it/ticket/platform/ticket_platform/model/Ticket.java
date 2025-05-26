@@ -1,10 +1,8 @@
 package it.ticket.platform.ticket_platform.model;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import it.ticket.platform.ticket_platform.enumeration.Status;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,7 +14,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
@@ -31,21 +28,14 @@ public class Ticket {
     private Long id;
 
     @Enumerated(EnumType.STRING) // ENUM per lo stato del ticket (APERTO, IN_CORSO, CHIUSO)
-    @NotNull(message = "Status è obbligatorio")
     private Status status;
-
-    @Column(name = "data_creazione")
-    private LocalDateTime dataCreazione;
-
-    @Column(name = "data_chiusura")
-    private LocalDateTime dataChiusura;
 
     @Size(min= 5, max= 20)
     @NotBlank(message = "Il titolo è obbligatorio")
     private String title;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false) // Chi gestisce il ticket (può essere assegnato più tardi)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     
@@ -75,22 +65,6 @@ public class Ticket {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public LocalDateTime getDataCreazione() {
-        return dataCreazione;
-    }
-
-    public void setDataCreazione(LocalDateTime dataCreazione) {
-        this.dataCreazione = dataCreazione;
-    }
-
-    public LocalDateTime getDataChiusura() {
-        return dataChiusura;
-    }
-
-    public void setDataChiusura(LocalDateTime dataChiusura) {
-        this.dataChiusura = dataChiusura;
     }
 
     public User getUser() {

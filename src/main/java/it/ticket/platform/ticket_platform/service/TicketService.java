@@ -1,6 +1,6 @@
 package it.ticket.platform.ticket_platform.service;
 
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -71,13 +71,17 @@ public class TicketService {
             userRepository.save(user); // Salvo la modifica
             addTicket.setUser(user); // Assegno l'operatore al ticket
         }
-        addTicket.setDataCreazione(LocalDateTime.now()); // Imposto la data di creazione
         return ticketRepository.save(addTicket);
     }
     
     // Salvo il ticket
     public Ticket saveTicket(Ticket ticket) {
         return ticketRepository.save(ticket);
+    }
+
+    // Trovo i ticket per titolo
+    public List<Ticket> findByTitleContainingIgnoreCase(String title) {
+        return ticketRepository.findByTitleContainingIgnoreCase(title);
     }
 
     // Modifica del ticket
@@ -93,9 +97,9 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
     //Elimino il ticket
-    public void deleteTicket(Long id){
-        Ticket ticket = ticketRepository.findById(id)
+    public void deleteById(Long id){
+        ticketRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Il ticket con ID " + id + " non esiste."));
-        ticketRepository.delete(ticket);
+        ticketRepository.deleteById(id);
     }
 }

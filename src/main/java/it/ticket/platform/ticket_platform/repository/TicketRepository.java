@@ -1,6 +1,5 @@
 package it.ticket.platform.ticket_platform.repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +10,9 @@ import it.ticket.platform.ticket_platform.model.Ticket;
 import it.ticket.platform.ticket_platform.model.User;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+
+    // Trova i ticket per titolo
+    List<Ticket> findByTitleContainingIgnoreCase(String title);
         
     //Trova tutti i ticket assegnati agli operatori
     List<Ticket> findByUser(User user);
@@ -24,6 +26,4 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     //Filtra per titolo
     List<Ticket> findByTitleContains(String title);
 
-    //Filtra i ticket per data creazione
-    List<Ticket> findByDataCreazione(LocalDateTime dataCreazione);
 }

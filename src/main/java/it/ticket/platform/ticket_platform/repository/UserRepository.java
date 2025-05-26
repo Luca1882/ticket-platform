@@ -19,4 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //Trova gli operatori non disponilibi
     List<User> findByDisponibileFalse();
+
 }

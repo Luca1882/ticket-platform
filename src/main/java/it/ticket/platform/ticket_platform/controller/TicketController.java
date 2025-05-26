@@ -1,7 +1,6 @@
 package it.ticket.platform.ticket_platform.controller;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import it.ticket.platform.ticket_platform.enumeration.Status;
+import it.ticket.platform.ticket_platform.model.Categoria;
 import it.ticket.platform.ticket_platform.model.Ticket;
 import it.ticket.platform.ticket_platform.model.User;
 import it.ticket.platform.ticket_platform.service.CategoryService;
@@ -44,111 +44,179 @@ public class TicketController {
     @Autowired
     private CategoryService categoryService;
 
-    // Dashboard Admin
-    @GetMapping("/admin/dashboard")
-    public String showAdminDashboard(@RequestParam(name = "search", required = false) String search, Model model) {
-        List<Ticket> tickets;
-        if (search != null && !search.isEmpty()) {
-            tickets = ticketService.findTicketByTitle(search);
-        } else {
-            tickets = ticketService.getTicket();
-        }
-
-        model.addAttribute("tickets", tickets);
-        model.addAttribute("search", search);
-        return "admin/dashboard";
-    }
-
     // METODI CRUD TICKET
     // Crea un ticket
 
-    @GetMapping("/ticket/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("ticket", new Ticket());
+    @GetMapping("/create")
+    public String createTicket(Model model) {
+
+        Ticket ticket = new Ticket();
+        ticket.setStatus(Status.IN_LAVORAZIONE);
+        model.addAttribute("ticket", ticket);
         model.addAttribute("categorie", categoryService.getAllCategories());
+        model.addAttribute("operatori", userService.findUserDisponibile());
         return "ticket/create";
     }
 
-    @PostMapping("/ticket/create")
-    public String createTicket(@Valid @ModelAttribute("ticket") Ticket ticket,
+    @PostMapping("/create")
+    public String salvaTicket(@Valid @ModelAttribute("ticket") Ticket ticket,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
 
+        // Recupero l'operatore completo dal DB (l'id arriva dalla form: user.id)
+        User operatore = userService.getUserById(ticket.getUser().getId());
+
+        Categoria categoria = categoryService.getCategoriaById(ticket.getCategoria().getId());
+        ticket.setCategoria(categoria);
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("categorie", categoryService.getAllCategories());
+            model.addAttribute("operatori", userService.findUserDisponibile());
             return "ticket/create";
         }
 
-        User operatoreDisponibile = userService.findOperatoreDisponibile();
-        if (operatoreDisponibile == null) {
+        if (operatore == null || !operatore.isDisponibile()) {
             model.addAttribute("categorie", categoryService.getAllCategories());
-            model.addAttribute("error", "Nessun operatore disponibile al momento.");
+            model.addAttribute("operatori", userService.findUserDisponibile());
+            model.addAttribute("errorMessage", "Operatore non disponibile.");
             return "ticket/create";
         }
 
-        ticket.setUser(operatoreDisponibile);
-        ticket.setDataCreazione(LocalDateTime.now());
-        ticket.setStatus(Status.IN_LAVORAZIONE);
+        // Assegno l’operatore
+        ticket.setUser(operatore);
 
+        // Salvo il ticket
         ticketService.saveTicket(ticket);
 
-        redirectAttributes.addFlashAttribute("success", "Ticket creato con successo!");
-        return "redirect:/ticket";
+        // Rendo l’operatore non disponibile
+        operatore.setDisponibile(false);
+        userService.saveUser(operatore);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Ticket creato con successo!");
+        return "redirect:/admin/dashboard";
     }
 
     // Modifica del ticket
-    @GetMapping("/ticket/edit/{id}")
+    @GetMapping("/edit/{id}")
     public String editTicket(@PathVariable("id") Long id, Model model) {
         Ticket ticket = ticketService.getTicketById(id);
+        List<User> operatoriDisponibili;
+        if (ticket.getUser() != null) {
+            operatoriDisponibili = userService.findUserDisponibile(ticket.getUser());
+        } else {
+            operatoriDisponibili = userService.findUserDisponibile();
+        }
+
         model.addAttribute("ticket", ticket);
         model.addAttribute("categorie", categoryService.getAllCategories());
+        model.addAttribute("operatori", operatoriDisponibili); // Recupera gli operatori disponibili
         return "ticket/edit";
     }
 
     // Post modifica ticket
-    @PostMapping("/ticket/edit/{id}")
-    public String updateTicket(@PathVariable("id") Long id,
+    @PostMapping("/edit/{id}")
+    public String updateTicket(@PathVariable Long id,
             @Valid @ModelAttribute("ticket") Ticket ticket,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
+
+        Ticket ticketEsistente = ticketService.getTicketById(id);
+
+        if (ticketEsistente == null) {
+            return "redirect:/admin/dashboard";
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("categorie", categoryService.getAllCategories());
+            model.addAttribute("operatori", userService.findUserDisponibile());
             return "ticket/edit";
         }
-        ticketService.aggiornaTicket(id, ticket);
-        redirectAttributes.addFlashAttribute("success", "Ticket aggiornato con successo!");
-        return "redirect:/ticket";
+
+        User nuovoOperatore = userService.getUserById(ticket.getUser().getId());
+
+        if (nuovoOperatore == null) {
+
+            model.addAttribute("categorie", categoryService.getAllCategories());
+            model.addAttribute("operatori", userService.findUserDisponibile());
+            model.addAttribute("errorMessage", "Operatore non valido.");
+            return "ticket/edit";
+        }
+
+        // Se è stato cambiato operatore: rendi disponibile il vecchio e occupato il
+        // nuovo
+        if (!ticketEsistente.getUser().getId().equals(nuovoOperatore.getId())) {
+            // Rendi disponibile il vecchio
+            User vecchioOperatore = ticketEsistente.getUser();
+            vecchioOperatore.setDisponibile(true);
+            userService.saveUser(vecchioOperatore);
+
+            // Rendi non disponibile il nuovo
+            nuovoOperatore.setDisponibile(false);
+            userService.saveUser(nuovoOperatore);
+        }
+
+        // Aggiorna i campi modificabili
+        ticketEsistente.setTitle(ticket.getTitle());
+        ticketEsistente.setTesto(ticket.getTesto());
+        ticketEsistente.setCategoria(categoryService.getCategoriaById(ticket.getCategoria().getId()));
+        ticketEsistente.setUser(nuovoOperatore);
+
+        ticketService.saveTicket(ticketEsistente);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Ticket aggiornato con successo!");
+        return "redirect:/admin/dashboard";
     }
 
     // Eliminazion del ticket
-    @PostMapping("/ticket/delete/{id}")
+    // Cancellazione definitiva del ticket (solo admin)
+    @PostMapping("/delete/{id}")
     public String deleteTicket(@PathVariable("id") Long id, RedirectAttributes redirectAttributes,
             Principal principal) {
         Optional<User> optionalUser = userService.getUserByEmail(principal.getName());
+
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            // Recupera il ticket prima di cancellare la nota associata
-            Ticket ticket = ticketService.getTicketById(id);
-
-            // Cancellazione della nota associata al ticket
-            noteService.deleteByTicket(ticket);
-
             // Controllo se l'utente è un admin
             if (user.getRole().getName().equals("ROLE_ADMIN")) {
-                ticket.setStatus(Status.IN_ATTESA);
-                ticketService.saveTicket(ticket);
+                try {
+                    Ticket ticket = ticketService.getTicketById(id);
 
-                redirectAttributes.addFlashAttribute("success", "Ticket impostato come 'IN_ATTESA'.");
+                    // Cancella la nota associata (se esiste)
+                    noteService.deleteByTicket(ticket);
+
+                    // Rendo disponibile l'operatore assegnato al ticket
+                    if (ticket.getUser() != null) {
+                        User operatore = ticket.getUser();
+                        operatore.setDisponibile(true);
+                        userService.saveUser(operatore);
+                    }
+
+                    // Cancella definitivamente il ticket
+                    ticketService.deleteById(id);
+
+                    redirectAttributes.addFlashAttribute("successMessage", "Ticket eliminato con successo!");
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Errore durante l'eliminazione del ticket.");
+                }
             } else {
-                redirectAttributes.addFlashAttribute("error", "Non hai i permessi per cancellare il ticket.");
+                redirectAttributes.addFlashAttribute("errorMessage", "Non hai i permessi per eliminare questo ticket.");
             }
         } else {
-            redirectAttributes.addFlashAttribute("error", "Utente non trovato.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Utente non trovato.");
         }
 
-        return "redirect:/ticket";
+        return "redirect:/admin/dashboard";
+    }
+
+    // Ricerca dei ticket per titolo
+    @GetMapping("/search")
+    public String search(Model model, @RequestParam(name = "keyword", required = false) String title) {
+        List<Ticket> tickets = ticketService.findByTitleContainingIgnoreCase(title);
+        model.addAttribute("list", tickets);
+        model.addAttribute("keyword", title);
+        return "admin/dashboard";
     }
 }

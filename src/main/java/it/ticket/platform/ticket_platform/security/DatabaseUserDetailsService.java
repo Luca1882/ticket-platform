@@ -24,7 +24,6 @@ public class DatabaseUserDetailsService implements UserDetailsService {
         if (userOpt.isEmpty()) {
             throw new UsernameNotFoundException("Nessun utente trovato con email: " + email);
         }
-
         return new DatabaseUserDetails(userOpt.get());
     }
 }

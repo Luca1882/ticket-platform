@@ -1,6 +1,5 @@
 package it.ticket.platform.ticket_platform.security;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,18 +17,33 @@ public class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http)
-        throws Exception{
-            http.authorizeHttpRequests()
+            throws Exception {
+        http.authorizeHttpRequests()
                 .requestMatchers("/ticket/create", "/ticket/edit", "/ticket/delete")
                 .hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/ticket/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
+                .requestMatchers("/admin/dashboard")
+                .hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/admin/**")
+                .hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/ticket/**")
+                .hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
                 .requestMatchers("/").permitAll()
                 .and().formLogin()
+                .successHandler((request, response, authentication) -> {
+                    String role = authentication.getAuthorities().iterator().next().getAuthority();
+                    if (role.equals("ROLE_ADMIN")) {
+                        response.sendRedirect("/admin/dashboard");
+                    } else {
+                        response.sendRedirect("/ticket");
+                    }
+                    System.out.println("Login riuscito! Ruolo: " + role);
+                    System.out.println("Redirect a: " + (role.equals("ROLE_ADMIN") ? "/admin/dashboard" : "/ticket"));
+                })
                 .and().exceptionHandling()
                 .and().logout()
                 .and().csrf().disable();
 
-            return http.build();
+        return http.build();
     }
 
     @Bean
