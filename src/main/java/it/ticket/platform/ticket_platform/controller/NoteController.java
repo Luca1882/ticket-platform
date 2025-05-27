@@ -71,6 +71,6 @@ public class NoteController {
         // Salva la nota
         noteService.saveNote(nota);
 
-        return "redirect:/ticket/" + ticketId;
+        return "redirect:/admin/dashboard";
     }
 }

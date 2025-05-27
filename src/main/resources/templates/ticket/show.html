@@ -52,8 +52,12 @@
                     </div>
                     <ul class="list-group" th:if="${not #lists.isEmpty(note)}">
                         <li class="list-group-item" th:each="n : ${note}">
-                            <strong>Autore:</strong> <span
-                                th:text="${n.user.username + ' - ' + n.user.email}"></span><br>
+                        <strong>Creato il:</strong>
+                        <span th:text="${#temporals.format(n.dataCreazione, 'dd/MM/yyyy HH:mm')}"></span><br> 
+                        <strong>Autore:</strong> <span th:text="${n.user.username + ' - ' + n.user.email}">
+                        </span><br>
+                        <strong>Descrizione:</strong>
+                            <p th:text="${n.descrizione}"></p>
                         </li>
                     </ul>
                 </div>

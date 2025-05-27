@@ -1,6 +1,5 @@
 package it.ticket.platform.ticket_platform.service;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +10,7 @@ import it.ticket.platform.ticket_platform.enumeration.Status;
 import it.ticket.platform.ticket_platform.model.Categoria;
 import it.ticket.platform.ticket_platform.model.Ticket;
 import it.ticket.platform.ticket_platform.model.User;
+import it.ticket.platform.ticket_platform.repository.NoteRepository;
 import it.ticket.platform.ticket_platform.repository.TicketRepository;
 import it.ticket.platform.ticket_platform.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +23,9 @@ public class TicketService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NoteRepository noteRepository;
 
     // Trova ticket
     public List<Ticket> getTicket() {
@@ -39,10 +42,10 @@ public class TicketService {
         }
     }
 
-    //Filtro per staturs
+    // Filtro per staturs
     public List<Ticket> getTicketsByStatus(Status status) {
-    return ticketRepository.findByStatus(status);
-}
+        return ticketRepository.findByStatus(status);
+    }
 
     // Ricerca del ticket per categoria
     public List<Ticket> getTicketsByCategoria(Categoria categoria) {
@@ -53,7 +56,7 @@ public class TicketService {
     public List<Ticket> getTicketsByUser(User user) {
         return ticketRepository.findByUser(user);
     }
-    
+
     // Creo e salvo ticket se ci sono operatori disponibili, altrimenti non faccio
     // nulla
     public Ticket creaTicket(Ticket addTicket) {
@@ -73,7 +76,7 @@ public class TicketService {
         }
         return ticketRepository.save(addTicket);
     }
-    
+
     // Salvo il ticket
     public Ticket saveTicket(Ticket ticket) {
         return ticketRepository.save(ticket);
@@ -85,9 +88,9 @@ public class TicketService {
     }
 
     // Modifica del ticket
-    public Ticket aggiornaTicket(Long id, Ticket showTicket){
+    public Ticket aggiornaTicket(Long id, Ticket showTicket) {
         Ticket ticket = ticketRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Il ticket con ID " + id + " non è stato trovato."));
+                .orElseThrow(() -> new RuntimeException("Il ticket con ID " + id + " non è stato trovato."));
 
         ticket.setTitle(showTicket.getTitle());
         ticket.setTesto(showTicket.getTesto());
@@ -96,10 +99,16 @@ public class TicketService {
 
         return ticketRepository.save(ticket);
     }
-    //Elimino il ticket
-    public void deleteById(Long id){
-        ticketRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Il ticket con ID " + id + " non esiste."));
+
+    // Elimino il ticket e tutte le sue note
+    public void deleteById(Long id) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Il ticket con ID " + id + " non esiste."));
+
+        // Cancella tutte le note associate
+        noteRepository.deleteByTicket(ticket);
+
+        // Cancella il ticket dopo aver eliminato le note
         ticketRepository.deleteById(id);
     }
 }

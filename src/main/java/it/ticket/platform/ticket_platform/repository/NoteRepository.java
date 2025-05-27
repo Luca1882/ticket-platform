@@ -14,7 +14,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
         List<Note> findByTicketOrderByDataCreazioneDesc(Ticket ticket);
 
         //Cancella la nota associata al ticket
-        void deleteAllByTicket(Ticket ticket);
+        void deleteByTicket(Ticket ticket);
 
         //Filtra tutte le note associate ad un ticket
         List<Note> findByTicket(Ticket ticket);
