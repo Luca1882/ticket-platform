@@ -23,7 +23,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     //Filtra i ticket per categoria
     List<Ticket> findByCategoria(Categoria categoria);
 
-    //Filtra per titolo
-    List<Ticket> findByTitleContains(String title);
 
 }

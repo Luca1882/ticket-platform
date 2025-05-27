@@ -19,6 +19,7 @@ import it.ticket.platform.ticket_platform.model.User;
 import it.ticket.platform.ticket_platform.service.NoteService;
 import it.ticket.platform.ticket_platform.service.TicketService;
 import it.ticket.platform.ticket_platform.service.UserService;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/note")
@@ -43,6 +44,7 @@ public class NoteController {
 
     @PostMapping("/create/{ticketId}")
     public String createNote(@PathVariable Long ticketId,
+            @Valid Note nota,
             @RequestParam String descrizione,
             Principal principal,
             RedirectAttributes redirectAttributes) {
@@ -60,8 +62,7 @@ public class NoteController {
             return "redirect:/admin/dashboard";
         }
 
-        // Creo una nuova nota
-        Note nota = new Note();
+        // Imposto i dati sulla nota esistente
         nota.setDescrizione(descrizione);
         nota.setTicket(ticket);
         nota.setUser(autore);

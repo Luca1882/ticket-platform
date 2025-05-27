@@ -54,11 +54,6 @@ public class TicketService {
         return ticketRepository.findByUser(user);
     }
     
-    // Ricerca dele ticket per titolo
-    public List<Ticket> findTicketByTitle(String title) {
-        return ticketRepository.findByTitleContains(title);
-    }
-
     // Creo e salvo ticket se ci sono operatori disponibili, altrimenti non faccio
     // nulla
     public Ticket creaTicket(Ticket addTicket) {

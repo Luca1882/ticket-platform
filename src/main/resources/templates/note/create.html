@@ -27,6 +27,7 @@
       <div class="mb-3">
         <label for="testo" class="form-label">Testo</label>
         <textarea class="form-control" th:field="*{descrizione}" rows="3" placeholder="Scrivi la tua nota..." required></textarea>
+        <div th:if="${#fields.hasErrors('descrizione')}" class="text-danger" th:errors="*{descrizione}"></div>
       </div>
 
       <button type="submit" class="btn btn-primary">Aggiungi Nota</button>

@@ -3,6 +3,7 @@ package it.ticket.platform.ticket_platform.model;
 import java.util.List;
 
 import it.ticket.platform.ticket_platform.enumeration.Status;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -48,7 +49,7 @@ public class Ticket {
     @NotBlank(message= "Il testo è obbligatoria")
     private String testo;
 
-    @OneToMany(mappedBy = "ticket")
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Note> notes;
 
     public Long getId() {

@@ -20,7 +20,7 @@
           </ul>
           <!-- Visibile solo agli amministratori -->
           <th:block sec:authorize="hasAuthority('ROLE_ADMIN')">
-            <form th:action="@{/ticket/search}" method="GET" class="d-flex">
+            <form th:action="@{/admin/dashboard}" method="GET" class="d-flex">
               <input class="form-control me-2" type="text" placeholder="Cerca ticket" name="keyword">
               <button type="submit" class="btn btn-success">Cerca</button>
             </form>
